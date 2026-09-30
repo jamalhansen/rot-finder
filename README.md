@@ -22,7 +22,7 @@ rot-finder --vault ~/vaults/Contexta --json
 rot-finder --ignore-tool pedantic-troll     # replaces the default on-demand ignore list
 ```
 
-`--dry-run` skips writing `--output`. Tools that are run on demand by design (`model-comparison-harness`, `fleet`, ...) are ignored by gone-quiet by default.
+`--dry-run` skips writing `--output`. Gone-quiet skips the tools listed as `ignore_tools` in `~/.config/local-first/rot-finder.toml` (default: the on-demand `model-comparison-harness`, `template-tool`, `fleet`, `rot-finder`) -- record a restart/retire/ignore decision there so the same finding isn't raised every week.
 
 ## First run (2026-09-29)
 

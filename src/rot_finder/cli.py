@@ -6,6 +6,7 @@ from typing import Annotated
 
 import typer
 from local_first_common.cli import dry_run_option, json_option
+from local_first_common.config import get_setting
 from local_first_common.tracking import register_tool, timed_run
 from rich.console import Console
 
@@ -33,7 +34,10 @@ def main(
     vault: Annotated[list[str] | None, typer.Option("--vault", help="Vault to scan (repeatable)")] = None,
     repos_dir: Annotated[str, typer.Option("--repos-dir", help="Directory of fleet git repos")] = DEFAULT_REPOS_DIR,
     db: Annotated[str, typer.Option("--db", help="processing_log DuckDB, for gone-quiet")] = DEFAULT_DB,
-    ignore_tool: Annotated[list[str] | None, typer.Option("--ignore-tool", help="Tool that runs on demand (repeatable)")] = None,
+    ignore_tool: Annotated[
+        list[str] | None,
+        typer.Option("--ignore-tool", help="Tool gone-quiet should skip (repeatable; replaces the configured ignore_tools list)"),
+    ] = None,
     limit: Annotated[int, typer.Option("--limit", "-l", help="Findings shown per section")] = 10,
     output: Annotated[str | None, typer.Option("--output", "-o", help="Also write the report to this file")] = None,
     as_json: Annotated[bool, json_option()] = False,
@@ -49,7 +53,7 @@ def main(
             _repos(Path(repos_dir).expanduser()),
             Path(db).expanduser(),
             now,
-            ignore_tools=ignore_tool if ignore_tool is not None else DEFAULT_IGNORE_TOOLS,
+            ignore_tools=get_setting(TOOL_NAME, "ignore_tools", cli_val=ignore_tool, default=DEFAULT_IGNORE_TOOLS),
         )
         run.item_count = len(result.findings)
 
