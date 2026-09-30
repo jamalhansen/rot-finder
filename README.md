@@ -29,7 +29,7 @@ rot-finder --ignore-tool pedantic-troll     # replaces the default on-demand ign
 Every section found something real in 3.5 seconds:
 
 - **Gone quiet:** `pebble` ran on 16 days in a row, then stopped 168 days ago; `social-post-reader`, `weekly-thread-triage`, `resource-summarizer`, `yt-transcription-summarizer` and `series-cross-link-suggester` too. None is failing, so `fleet status` never mentioned them.
-- **Stale claim:** BrainSync's enhancements-status doc still says `ContentMetadata` is unused, 169 days after the auto-tagger started using it.
+- **Stale claim:** BrainSync's enhancements-status doc still reports the ContentMetadata model as having no users, 169 days after the auto-tagger adopted it.
 - **Stalled work:** four `developing` Contexta seeds untouched for 5-6 months, and obsidian-hugo-bridge's unfinished verification checklist.
 
 The first version was noisy (449 "stalled" items, mostly test fixtures; stale claims triggered by plain words like `draft` on long lines). Every threshold above exists because a false positive showed up in real data -- a digest that's mostly noise gets ignored, which is the rot this tool exists to prevent.
