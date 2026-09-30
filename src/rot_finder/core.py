@@ -78,6 +78,19 @@ def iter_files(roots: Iterable[Path], suffix: str) -> Iterator[Path]:
                     yield Path(dirpath) / name
 
 
+def numbered_lines(path: Path) -> Iterator[tuple[int, str]]:
+    """(lineno, line) pairs, skipping fenced code blocks in markdown -- READMEs show
+    sample output there, and a checkbox or claim in an example isn't the author's."""
+    in_fence = False
+    is_markdown = path.suffix == ".md"
+    for lineno, line in enumerate(path.read_text(encoding="utf-8", errors="ignore").splitlines(), start=1):
+        if is_markdown and line.lstrip().startswith(("```", "~~~")):
+            in_fence = not in_fence
+            continue
+        if not in_fence:
+            yield lineno, line
+
+
 def mtime_age(path: Path, now: datetime) -> int:
     return (now - datetime.fromtimestamp(path.stat().st_mtime)).days  # noqa: DTZ006 - naive local time, same as processing_log's timestamps
 
@@ -169,7 +182,7 @@ def stale_claims(doc_roots: Iterable[Path], code: list[tuple[Path, str]], now: d
     """Docs saying a `symbol` is unused or unbuilt while other code imports or calls it."""
     findings = []
     for doc in iter_files(doc_roots, ".md"):
-        for lineno, line in enumerate(doc.read_text(encoding="utf-8", errors="ignore").splitlines(), start=1):
+        for lineno, line in numbered_lines(doc):
             if len(line) > MAX_CLAIM_LINE or not _CLAIM_RE.search(line):
                 continue
             idents = [i for i in dict.fromkeys(_IDENT_RE.findall(line)) if _CODE_LIKE_RE.search(i)]
@@ -199,7 +212,7 @@ def deferrals(doc_roots: Iterable[Path], code_roots: Iterable[Path], now: dateti
     sources = [(p, _DOC_DEFERRAL_RE) for p in iter_files(doc_roots, ".md")]
     sources += [(p, _CODE_DEFERRAL_RE) for p in iter_files(code_roots, ".py")]
     for path, regex in sources:
-        for lineno, line in enumerate(path.read_text(encoding="utf-8", errors="ignore").splitlines(), start=1):
+        for lineno, line in numbered_lines(path):
             if not regex.search(line):
                 continue
             age = _line_age(path, lineno, now, cache)
@@ -218,7 +231,7 @@ def unchecked_items(repo_roots: Iterable[Path], now: datetime, min_age_days: int
     for path in iter_files(repo_roots, ".md"):
         if not PLANNING_DOC_RE.match(path.name):
             continue
-        for lineno, line in enumerate(path.read_text(encoding="utf-8", errors="ignore").splitlines(), start=1):
+        for lineno, line in numbered_lines(path):
             if _UNCHECKED_RE.match(line):
                 age = _line_age(path, lineno, now, cache)
                 if age >= min_age_days:

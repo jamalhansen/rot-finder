@@ -100,6 +100,7 @@ def repo(tmp_path):
     git("config", "user.email", "t@example.com")
     git("config", "user.name", "t")
     _write(root / "ROADMAP.md", "- [ ] old item\n- [x] done item\n")
+    _write(root / "README.md", "Sample report:\n```markdown\n- [ ] example checkbox\n```\n")
     _write(root / "src/pkg/core.py", "x = 1  # TODO: handle unicode\n")
     _write(root / "tests/fixtures/sample.md", "- [ ] fixture checkbox\n")
     git("add", ".")
