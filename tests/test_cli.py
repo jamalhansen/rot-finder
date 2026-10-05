@@ -10,7 +10,14 @@ runner = CliRunner()
 def _args(tmp_path):
     (tmp_path / "vault").mkdir()
     (tmp_path / "repos").mkdir()
-    return ["--vault", str(tmp_path / "vault"), "--repos-dir", str(tmp_path / "repos"), "--db", str(tmp_path / "none.duckdb")]
+    return [
+        "--vault",
+        str(tmp_path / "vault"),
+        "--repos-dir",
+        str(tmp_path / "repos"),
+        "--db",
+        str(tmp_path / "none.duckdb"),
+    ]
 
 
 def test_report_and_output_file(tmp_path):

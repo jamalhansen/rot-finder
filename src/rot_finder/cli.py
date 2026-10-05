@@ -22,7 +22,9 @@ DEFAULT_DB = "~/sync/local-first/processing_log.duckdb"
 DEFAULT_IGNORE_TOOLS = ["model-comparison-harness", "template-tool", "fleet", "rot-finder"]
 
 console = Console(stderr=True)
-app = typer.Typer(help="Surfaces what's quietly rotting across the fleet and vaults: tools gone quiet, stale claims, aging deferrals, stalled work.")
+app = typer.Typer(
+    help="Surfaces what's quietly rotting across the fleet and vaults: tools gone quiet, stale claims, aging deferrals, stalled work."
+)
 
 
 def _repos(repos_dir: Path) -> list[Path]:
@@ -36,7 +38,9 @@ def main(
     db: Annotated[str, typer.Option("--db", help="processing_log DuckDB, for gone-quiet")] = DEFAULT_DB,
     ignore_tool: Annotated[
         list[str] | None,
-        typer.Option("--ignore-tool", help="Tool gone-quiet should skip (repeatable; replaces the configured ignore_tools list)"),
+        typer.Option(
+            "--ignore-tool", help="Tool gone-quiet should skip (repeatable; replaces the configured ignore_tools list)"
+        ),
     ] = None,
     limit: Annotated[int, typer.Option("--limit", "-l", help="Findings shown per section")] = 10,
     output: Annotated[str | None, typer.Option("--output", "-o", help="Also write the report to this file")] = None,

@@ -19,11 +19,26 @@ from pathlib import Path
 import duckdb
 import frontmatter
 
-EXCLUDE_DIRS = frozenset({
-    "archive", "archived", ".obsidian", ".trash", ".git", ".venv", "node_modules",
-    "results", "templates", "Templates", "sessions", "__pycache__", ".pytest_cache", ".ruff_cache",
-    "examples", "fixtures",
-})
+EXCLUDE_DIRS = frozenset(
+    {
+        "archive",
+        "archived",
+        ".obsidian",
+        ".trash",
+        ".git",
+        ".venv",
+        "node_modules",
+        "results",
+        "templates",
+        "Templates",
+        "sessions",
+        "__pycache__",
+        ".pytest_cache",
+        ".ruff_cache",
+        "examples",
+        "fixtures",
+    }
+)
 PLANNING_DOC_RE = re.compile(r"^(?:_?notes|roadmap|todo|plan|backlog|next|readme)\b.*\.md$", re.IGNORECASE)
 
 # Not "active": Contexta uses it for "this claim is current", not work in progress.
@@ -45,7 +60,9 @@ _DOC_DEFERRAL_RE = re.compile(
     re.IGNORECASE,
 )
 # Character classes ([T]ODO, ...) keep this line from matching itself.
-_CODE_DEFERRAL_RE = re.compile(r"#\s*(?:[T]ODO|[F]IXME|[H]ACK|[X]XX)\b|#.*\b(?:[w]orkaround|[n]ot worth fixing)\b", re.IGNORECASE)
+_CODE_DEFERRAL_RE = re.compile(
+    r"#\s*(?:[T]ODO|[F]IXME|[H]ACK|[X]XX)\b|#.*\b(?:[w]orkaround|[n]ot worth fixing)\b", re.IGNORECASE
+)
 _UNCHECKED_RE = re.compile(r"^\s*[-*] \[ \] ")
 
 
@@ -99,7 +116,10 @@ def blame_ages(path: Path, now: datetime) -> dict[int, int] | None:
     """Age in days of every line (1-based) per `git blame`, or None outside git or for untracked files."""
     proc = subprocess.run(
         ["git", "blame", "--line-porcelain", path.name],
-        cwd=path.parent, capture_output=True, text=True, check=False,
+        cwd=path.parent,
+        capture_output=True,
+        text=True,
+        check=False,
     )
     if proc.returncode != 0:
         return None
@@ -157,12 +177,14 @@ def gone_quiet(
         typical = statistics.median((b - a).days for a, b in pairwise(days))
         silence = (now.date() - days[-1]).days
         if silence > max(min_silence_days, factor * typical):
-            findings.append(Finding(
-                "gone-quiet",
-                tool,
-                f"ran on {len(days)} days, usually every ~{typical:g}d -- silent since {days[-1]}",
-                silence,
-            ))
+            findings.append(
+                Finding(
+                    "gone-quiet",
+                    tool,
+                    f"ran on {len(days)} days, usually every ~{typical:g}d -- silent since {days[-1]}",
+                    silence,
+                )
+            )
     return findings
 
 
@@ -193,19 +215,23 @@ def stale_claims(doc_roots: Iterable[Path], code: list[tuple[Path, str]], now: d
                 defines = re.compile(rf"^\s*(?:class|def|async def)\s+{re.escape(ident)}\b", re.MULTILINE)
                 users = [p for p, text in code if pattern.search(text) and not defines.search(text)]
                 if users:
-                    findings.append(Finding(
-                        "stale-claim",
-                        f"{doc}:{lineno}",
-                        f"says `{ident}` is unused/unbuilt, but {len(users)} file(s) use it, e.g. {users[0]}",
-                        mtime_age(doc, now),
-                    ))
+                    findings.append(
+                        Finding(
+                            "stale-claim",
+                            f"{doc}:{lineno}",
+                            f"says `{ident}` is unused/unbuilt, but {len(users)} file(s) use it, e.g. {users[0]}",
+                            mtime_age(doc, now),
+                        )
+                    )
     return findings
 
 
 # --- detector 3: aging deferrals -----------------------------------------------
 
 
-def deferrals(doc_roots: Iterable[Path], code_roots: Iterable[Path], now: datetime, min_age_days: int = 30) -> list[Finding]:
+def deferrals(
+    doc_roots: Iterable[Path], code_roots: Iterable[Path], now: datetime, min_age_days: int = 30
+) -> list[Finding]:
     """Written-down decisions not to deal with something, dated so their age is visible."""
     findings = []
     cache: dict[Path, dict[int, int] | None] = {}
